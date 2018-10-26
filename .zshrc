@@ -123,9 +123,9 @@ echo $PATH | grep -q $PYTHON3PATH || export PATH=$PYTHON3PATH:$PATH
 [[ -s "${HOME}/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 
 # Go
-if command -v go >/dev/null; then
-  export GOPATH=`go env GOPATH`
-  export GOROOT=`go env GOROOT`
+if which go >/dev/null; then
+  export GOPATH=$(go env GOPATH)
+  export GOROOT=$(go env GOROOT)
   echo $PATH | grep -q $GOPATH/bin || export PATH=$GOPATH/bin:$PATH
   echo $PATH | grep -q $GOROOT/bin || export PATH=$GOROOT/bin:$PATH
 fi
@@ -214,10 +214,14 @@ alias lmpm="$REPO_PATH/lmpm/builder/use.sh"
 source /usr/local/share/chruby/chruby.sh
 source /usr/local/share/chruby/auto.sh
 
+# pgsql
+[ -d /usr/local/opt/postgresql@9.6/bin ] && export PATH=/usr/local/opt/postgresql@9.6/bin:$PATH
+
+# GNUBIN
+[ -d /usr/local/opt/coreutils/libexec/gnubin ] && export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
+
 # SSH AGENT - add all known identities
 ssh-add -A 2>/dev/null
-
-[[ -s "/Users/simonaquino/.gvm/scripts/gvm" ]] && source "/Users/simonaquino/.gvm/scripts/gvm"
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f /Users/simonaquino/google-cloud-sdk/path.zsh.inc ]; then
@@ -228,6 +232,16 @@ fi
 if [ -f /Users/simonaquino/google-cloud-sdk/completion.zsh.inc ]; then
   source '/Users/simonaquino/google-cloud-sdk/completion.zsh.inc'
 fi
-
 # The next line enables direnv
 eval "$(direnv hook zsh)"
+
+# Expose you are in aws vault
+function get_aws_vault_profile() {
+  [ -z $AWS_VAULT ] && return
+  echo -n "aws:$AWS_VAULT "
+}
+
+PROMPT="$(get_aws_vault_profile)$PROMPT"
+
+# added by travis gem
+[ -f /Users/simonaquino/.travis/travis.sh ] && source /Users/simonaquino/.travis/travis.sh

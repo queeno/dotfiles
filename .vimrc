@@ -3,6 +3,7 @@ syntax on
 set tabstop=4
 set shiftwidth=4
 set expandtab
+set noswapfile
 set mouse=a
 if has('unnamedplus')
   set clipboard=unnamedplus
@@ -65,7 +66,7 @@ call vundle#rc(s:editor_root . '/bundle')
 
 Plugin 'gmarik/vundle.vim'
 Plugin 'szw/vim-ctrlspace'
-Plugin 'editorconfig/editorconfig-vim'
+"Plugin 'editorconfig/editorconfig-vim'
 Plugin 'myusuf3/numbers.vim'
 Plugin 'scrooloose/syntastic'
 Plugin 'terryma/vim-multiple-cursors'
@@ -181,9 +182,9 @@ let g:airline#extensions#default#layout = [
 let g:ctrlspace_project_root_markers = [".git", ".hg", ".svn", ".bzr", "_darcs", "CVS", "proj.sln"]
 
 " Set up ultisnips - need to symlink vim scripts to be run when files are opened
-if !isdirectory(s:editor_root . "/ftdetect")
-    silent execute "!ln -s " . s:editor_root . "/bundle/ultisnips/ftdetect " . s:editor_root . "/"
-endif
+"if empty(globpath(s:editor_root, "ftdetect"))
+"    silent execute "!ln -s " . s:editor_root . "/bundle/ultisnips/ftdetect " . s:editor_root . "/"
+"endif
 let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<tab>"
 let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
