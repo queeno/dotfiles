@@ -3,7 +3,7 @@ export ZPLUG_HOME=~/.config/zplug
 source $(brew --prefix zplug)/init.zsh
 
 # Base16-shell
-BASE16_SHELL=$HOME/.config/base16-shell/
+export BASE16_SHELL=$HOME/.config/base16-shell/
 [ -n "$PS1" ] && [ -s $BASE16_SHELL/profile_helper.sh ] && eval "$($BASE16_SHELL/profile_helper.sh)"
 
 zplug "djui/alias-tips"
@@ -23,8 +23,9 @@ zplug "zsh-users/zsh-syntax-highlighting", defer:3 # Should be loaded 2nd last.
 
 # Theme.
 setopt prompt_subst # Make sure propt is able to be generated properly.
-zplug "mafredri/zsh-async", on:sindresorhus/pure
-zplug "sindresorhus/pure", use:pure.zsh
+zplug "denysdovhan/spaceship-prompt", use:"spaceship.zsh", from:"github", as:"theme"
+#zplug "sindresorhus/pure", use:pure.zsh
+#zplug "mafredri/zsh-async", on:sindresorhus/pure
 
 # Check for uninstalled plugins.
 if ! zplug check --verbose; then
@@ -55,20 +56,23 @@ setopt hist_reduce_blanks
 setopt hist_save_no_dups
 setopt share_history
 
+export TERM=xterm-256color
+
 export CLICOLOR=1
 export BLOCK_SIZE=human-readable # https://www.gnu.org/software/coreutils/manual/html_node/Block-size.html
 export HISTSIZE=11000
 export SAVEHIST=10000
 export HISTFILE=~/.zsh_history
 
-unset COMPLETION_WAITING_DOTS # https://github.com/tarruda/zsh-autosuggestions#known-issues
-#export COMPLETION_WAITING_DOTS=true
+#unset COMPLETION_WAITING_DOTS # https://github.com/tarruda/zsh-autosuggestions#known-issues
+export COMPLETION_WAITING_DOTS=true
 export DEFAULT_USER="simonaquino"
 export DISABLE_AUTO_TITLE=true
 export DISABLE_CORRECTION=true
 #export DISABLE_UNTRACKED_FILES_DIRTY=true # Improves repo status check time.
 export DISABLE_UPDATE_PROMPT=true
 export EDITOR='vim'
+export VISUAL='vim'
 export FZF_DEFAULT_COMMAND='ag -l -g ""' # Use ag as the default source for fzf
 export FZF_DEFAULT_OPTS='--multi'
 export NOTIFY_COMMAND_COMPLETE_TIMEOUT=300
@@ -92,7 +96,11 @@ zmodload zsh/complist
 
 ### KEY BINDINGS ###
 KEYTIMEOUT=1 # Prevents key timeout lag.
+bindkey -e
 bindkey -M viins ‘jj’ vi-cmd-mode
+bindkey '^r' history-incremental-search-backward
+bindkey '^R' history-incremental-pattern-search-backward
+
 
 # Bind UP and DOWN arrow keys for subsstring search.
 if zplug check zsh-users/zsh-history-substring-search; then
@@ -101,6 +109,12 @@ if zplug check zsh-users/zsh-history-substring-search; then
   bindkey "$terminfo[cud1]" history-substring-search-down
 fi
 
+### SPACESHIP ###
+SPACESHIP_CHAR_SYMBOL='❯'
+SPACESHIP_CHAR_SUFFIX=' '
+SPACESHIP_KUBECONTEXT_SHOW=false
+SPACESHIP_AWS_SHOW=false
+SPACESHIP_VI_MODE_SHOW=false
 
 ### PATHS ###
 
@@ -119,6 +133,14 @@ echo $PATH | grep -q $PYTHONPATH || export PATH=$PYTHONPATH:$PATH
 PYTHON3PATH=/Users/simonaquino/Library/Python/3.6/bin
 echo $PATH | grep -q $PYTHON3PATH || export PATH=$PYTHON3PATH:$PATH
 
+# Krew
+KREW_ROOT=$HOME/.krew/bin
+echo $PATH | grep -q $KREW_ROOT || export PATH=$KREW_ROOT:$PATH
+
+# Cargo
+CARGO=$HOME/.cargo/env
+echo $PATH | grep -q $CARGO || export PATH=$CARGO:$PATH
+
 # GVM
 [[ -s "${HOME}/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 
@@ -126,6 +148,7 @@ echo $PATH | grep -q $PYTHON3PATH || export PATH=$PYTHON3PATH:$PATH
 if which go >/dev/null; then
   export GOPATH=$(go env GOPATH)
   export GOROOT=$(go env GOROOT)
+  export GOBIN=$GOPATH/bin
   echo $PATH | grep -q $GOPATH/bin || export PATH=$GOPATH/bin:$PATH
   echo $PATH | grep -q $GOROOT/bin || export PATH=$GOROOT/bin:$PATH
 fi
@@ -199,6 +222,17 @@ alias dm='docker-machine'
 # LMPM
 alias lmpm="$REPO_PATH/lmpm/builder/use.sh"
 
+# Kubernetes
+alias k='kubectl'
+alias kg='kubectl get'
+alias ke='kubectl edit'
+alias kd='kubectl delete'
+alias kgp='kubectl get pods'
+alias kgd='kubectl get deployments'
+alias kns='kubens'
+alias kcx='kubectx'
+
+
 ### LIBRARY CONFIG ###
 
 # NVM
@@ -232,6 +266,7 @@ fi
 if [ -f /Users/simonaquino/google-cloud-sdk/completion.zsh.inc ]; then
   source '/Users/simonaquino/google-cloud-sdk/completion.zsh.inc'
 fi
+
 # The next line enables direnv
 eval "$(direnv hook zsh)"
 
