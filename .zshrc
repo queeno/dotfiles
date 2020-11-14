@@ -191,6 +191,7 @@ alias vimclean='rm -rf ~/.config/nvim/session/* ~/.config/nvim/swap/* ~/.config/
 alias git='hub'
 alias github='gitit'
 alias gitgraph='git log --all --graph --decorate --oneline'
+alias gpr='git pull-request'
 
 # NeoVim
 alias nvim-debug='ulimit -c unlimited && nvim'
@@ -226,11 +227,13 @@ alias lmpm="$REPO_PATH/lmpm/builder/use.sh"
 alias k='kubectl'
 alias kg='kubectl get'
 alias ke='kubectl edit'
-alias kd='kubectl delete'
+alias kd='kubectl describe'
+alias kdd='kubectl delete'
 alias kgp='kubectl get pods'
 alias kgd='kubectl get deployments'
 alias kns='kubens'
 alias kcx='kubectx'
+alias wkgp='watch kubectl get pod'
 
 
 ### LIBRARY CONFIG ###
