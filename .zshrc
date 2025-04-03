@@ -20,6 +20,7 @@ zplug "zsh-users/zsh-autosuggestions", defer:2
 zplug "zsh-users/zsh-completions"
 zplug "zsh-users/zsh-history-substring-search", defer:3 # Should be loaded last.
 zplug "zsh-users/zsh-syntax-highlighting", defer:3 # Should be loaded 2nd last.
+zplug "chriskempson/base16-shell", from:github
 
 # Theme.
 setopt prompt_subst # Make sure propt is able to be generated properly.
@@ -38,6 +39,7 @@ fi
 # Source plugins.
 zplug load
 
+[ -f /opt/homebrew/share/google-cloud-sdk/bin/kubectl ] && export KUBE_PS1_BINARY="/opt/homebrew/share/google-cloud-sdk/bin/kubectl"
 
 ### COMPLETIONS ###
 [ -f /usr/local/bin/aws_zsh_completer.sh ] && source /usr/local/bin/aws_zsh_completer.sh
@@ -112,8 +114,9 @@ fi
 ### SPACESHIP ###
 SPACESHIP_CHAR_SYMBOL='❯'
 SPACESHIP_CHAR_SUFFIX=' '
-SPACESHIP_KUBECONTEXT_SHOW=false
+SPACESHIP_KUBECTL_CONTEXT_SHOW=false
 SPACESHIP_AWS_SHOW=false
+SPACESHIP_GCLOUD_SHOW=false
 SPACESHIP_VI_MODE_SHOW=false
 
 ### PATHS ###
@@ -124,10 +127,6 @@ export REPO_PATH=$HOME/hmrc
 # Ruby
 RUBYPATH=/usr/local/opt/ruby/bin
 echo $PATH | grep -q $RUBYPATH || export PATH=$RUBYPATH:$PATH
-
-# Python
-PYTHONPATH=/Users/simonaquino/Library/Python/2.7/bin
-echo $PATH | grep -q $PYTHONPATH || export PATH=$PYTHONPATH:$PATH
 
 # Python 3
 PYTHON3PATH=/Users/simonaquino/Library/Python/3.6/bin
@@ -144,15 +143,6 @@ echo $PATH | grep -q $CARGO || export PATH=$CARGO:$PATH
 # GVM
 [[ -s "${HOME}/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 
-# Go
-if which go >/dev/null; then
-  export GOPATH=$(go env GOPATH)
-  export GOROOT=$(go env GOROOT)
-  export GOBIN=$GOPATH/bin
-  echo $PATH | grep -q $GOPATH/bin || export PATH=$GOPATH/bin:$PATH
-  echo $PATH | grep -q $GOROOT/bin || export PATH=$GOROOT/bin:$PATH
-fi
-
 # Java
 #JAVA_HOME=/Library/Internet\ Plug-Ins/JavaAppletPlugin.plugin/Contents/Home
 #[ -f $JAVA_HOME/bin/java ] && export JAVA_HOME=$JAVA_HOME
@@ -163,6 +153,24 @@ if command -v brew >/dev/null; then
   BREWBIN=/usr/local/bin
   echo $PATH | grep -q $BREWSBIN || export PATH=$BREWSBIN:$PATH
   echo $PATH | grep -q $BREWBIN || export PATH=$BREWBIN:$PATH
+fi
+
+# TFSwitch
+if command -v tfswitch >/dev/null; then
+  HOMEBIN=/Users/simonaquino/bin
+  echo $PATH | grep -q $HOMEBIN || export PATH=$HOMEBIN:$PATH
+fi
+
+# Go
+if which go >/dev/null; then
+  unset GOROOT
+  unset GOPATH
+  export GOPATH=$(go env GOPATH)
+  export GOROOT=$(go env GOROOT)
+  export GO111MODULE=on
+  export GOBIN=$GOPATH/bin
+  echo $PATH | grep -q $GOPATH/bin || export PATH=$GOPATH/bin:$PATH
+  echo $PATH | grep -q $GOROOT/bin || export PATH=$GOROOT/bin:$PATH
 fi
 
 # Composer
@@ -188,10 +196,10 @@ alias kmux='tmux kill-server'
 alias vimclean='rm -rf ~/.config/nvim/session/* ~/.config/nvim/swap/* ~/.config/nvim/undo/*  ~/.config/nvim/views/*'
 
 # Git
-alias git='hub'
-alias github='gitit'
 alias gitgraph='git log --all --graph --decorate --oneline'
 alias gpr='git pull-request'
+# Unalias gt for graphite.dev
+unalias gt
 
 # NeoVim
 alias nvim-debug='ulimit -c unlimited && nvim'
@@ -235,6 +243,13 @@ alias kns='kubens'
 alias kcx='kubectx'
 alias wkgp='watch kubectl get pod'
 
+# Mac
+alias brewup='brew update && brew upgrade && brew upgrade --cask && brew cleanup'
+alias macup='softwareupdate --install -a'
+alias gcloudup='gcloud components update'
+
+# Python
+#alias python=/opt/homebrew/bin/python3
 
 ### LIBRARY CONFIG ###
 
@@ -260,16 +275,6 @@ source /usr/local/share/chruby/auto.sh
 # SSH AGENT - add all known identities
 ssh-add -A 2>/dev/null
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f /Users/simonaquino/google-cloud-sdk/path.zsh.inc ]; then
-  source '/Users/simonaquino/google-cloud-sdk/path.zsh.inc'
-fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f /Users/simonaquino/google-cloud-sdk/completion.zsh.inc ]; then
-  source '/Users/simonaquino/google-cloud-sdk/completion.zsh.inc'
-fi
-
 # The next line enables direnv
 eval "$(direnv hook zsh)"
 
@@ -279,7 +284,16 @@ function get_aws_vault_profile() {
   echo -n "aws:$AWS_VAULT "
 }
 
+# Gcloud
+export CLOUDSDK_PYTHON=/opt/homebrew/bin/python3
+
 PROMPT="$(get_aws_vault_profile)$PROMPT"
 
-# added by travis gem
-[ -f /Users/simonaquino/.travis/travis.sh ] && source /Users/simonaquino/.travis/travis.sh
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/simonaquino/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/simonaquino/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/simonaquino/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/simonaquino/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+# The next line adds playtube if it exists
+if [ -f '/Users/simonaquino/.playtube.sh' ]; then alias playtube="/Users/simonaquino/.playtube.sh"; fi
